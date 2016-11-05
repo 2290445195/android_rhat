@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 自定义id资源文件 -->
+<resources>
+    <!-- activity_diary.xml -->
+    <item name="diary_imgv_top1" type="id"></item>
+    <item name="diary_imgv_top2" type="id"></item>
+    <item name="diary_rl_title1" type="id"></item>
+    <item name="diary_sv_child" type="id"></item>
+    <item name="diary_sv_parent" type="id"></item>
+    <item name="diary_imgbtn_edit" type="id"></item>
+
+    <!-- activity_update.xml -->
+    <item name="new_imgbtn_save" type="id"></item>
+</resources>

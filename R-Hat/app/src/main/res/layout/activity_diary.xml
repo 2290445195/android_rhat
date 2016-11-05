@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    tools:context=".ui.MainActivity">
+
+    <ImageView
+        android:id="@id/diary_imgv_top2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:src="@drawable/test1" />
+
+    <RelativeLayout
+        android:id="@+id/diary_rl_title2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="#000000"
+        android:paddingBottom="10dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="10dp">
+
+        <ImageView
+            android:id="@+id/diary_imgv_weather2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_launcher" />
+
+        <TextView
+            android:id="@+id/diary_tv_title2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:text="Title"
+            android:textColor="#FFFFFF"
+            android:textSize="36dp" />
+
+    </RelativeLayout>
+
+    <com.rhat.r_hat.view.MyScrollView
+        android:id="@id/diary_sv_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@id/diary_imgv_top1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:visibility="invisible"
+                android:src="@drawable/test1" />
+
+            <RelativeLayout
+                android:id="@+id/diary_rl_main"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/diary_imgv_top1">
+
+                <RelativeLayout
+                    android:id="@+id/diary_rl_title1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#000000"
+                    android:paddingBottom="10dp"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:paddingTop="10dp">
+
+                    <ImageView
+                        android:id="@+id/diary_imgv_weather1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@mipmap/ic_launcher" />
+
+                    <TextView
+                        android:id="@+id/diary_tv_title1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerVertical="true"
+                        android:text="Title"
+                        android:textColor="#FFFFFF"
+                        android:textSize="36dp" />
+
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/diary_tv_diary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/diary_rl_title1"
+                    android:background="#FFFFFF"
+                    android:gravity="top"
+                    android:lineSpacingMultiplier="1.2"
+                    android:paddingLeft="72dp"
+                    android:paddingRight="16dp"
+                    android:textColor="#808080"
+                    android:textSize="28dp" />
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </com.rhat.r_hat.view.MyScrollView>
+
+    <ImageButton
+        android:id="@id/diary_imgbtn_edit"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="16dp"
+        android:background="@android:color/transparent"
+        android:src="@drawable/button_edit"
+        android:alpha="0.7" />
+
+</RelativeLayout>
