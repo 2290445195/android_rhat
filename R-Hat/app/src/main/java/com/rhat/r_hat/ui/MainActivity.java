@@ -57,33 +57,30 @@ public class MainActivity extends ListActivity {
         *日记列表
         */
         //定义一个动态数组(应该定义一个getDate()方法)
-        ArrayList<HashMap<String, Object>> listItem = new ArrayList<HashMap<String,     Object>>();
-        if(dt.load(context, "userinfo", "username").equals("")){
-            String jsonStr = null;
-            if(!(jsonStr = dt.load(context, "diaryInfo", "diaryList")).equals("")){
-                //把Json字符串转化为List
-                diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
-                for(int i = 0;i < diaryList.size();i++)
-                {
-                    HashMap<String, Object> map = new HashMap<String, Object>();
-                    diary = diaryList.get(i);
-                    String diaryStr = "";
-                    int end = 0;
-                    if(!diary.getDiary().equals("")){
-                        diaryStr = diary.getDiary();
-                    }
-                    if(diaryStr.length() >= 10){
-                        end = 10;
-                    }else{
-                        end = diaryStr.length();
-                    }
-                    map.put("diary_title", diary.getTitle());
-                    map.put("diary_date", diary.getDate());
-                    map.put("diary_str", diaryStr.substring(0, end));
-                    listItem.add(map);
+        ArrayList<HashMap<String, Object>> listItem = new ArrayList<HashMap<String, Object>>();
+        String jsonStr = null;
+        if (!(jsonStr = dt.load(context, "diaryInfo", "diaryList")).equals("")) {
+            //把Json字符串转化为List
+            diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
+            for (int i = 0; i < diaryList.size(); i++) {
+                HashMap<String, Object> map = new HashMap<String, Object>();
+                diary = diaryList.get(i);
+                String diaryStr = "";
+                int end = 0;
+                if (!diary.getDiary().equals("")) {
+                    diaryStr = diary.getDiary();
                 }
+                if (diaryStr.length() >= 10) {
+                    end = 10;
+                } else {
+                    end = diaryStr.length();
+                }
+                map.put("diary_title", diary.getTitle());
+                map.put("diary_date", diary.getDate());
+                map.put("diary_str", diaryStr.substring(0, end));
+                listItem.add(map);
             }
-        }else{}
+        }
         //设置适配器
         adapter = new SimpleAdapter(MainActivity.this, listItem, R.layout.item_main, new String[] {"diary_title","diary_date","diary_str"}, new int[] {R.id.item_main_title,R.id.item_main_date,R.id.item_main_str});
         setListAdapter(adapter);

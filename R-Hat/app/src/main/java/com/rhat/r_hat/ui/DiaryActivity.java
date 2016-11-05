@@ -38,16 +38,9 @@ public class DiaryActivity extends AppCompatActivity implements OnScrollListener
     private RelativeLayout rl_title2;
     private Intent intent;
 
-    //手指按下的Y位置
-    private int down_Y;
-    //手指离开的X位置
-    private int up_X;
-    //手指离开的Y位置
-    private int up_Y;
-    //手指滑动的Y距离
-    private int move_Y;
-    //文本滚出的Y外置
-    private int sv_scroll_Y;
+
+    //日记id
+    private int id;
     //顶部图片的高度
     private int imagv_height;
     //标题布局的高度
@@ -84,6 +77,7 @@ public class DiaryActivity extends AppCompatActivity implements OnScrollListener
             public void onClick(View view) {
                 intent = new Intent();
                 intent.setClass(DiaryActivity.this, EditActivity.class);
+                intent.putExtra("id", id);
                 startActivity(intent);
                 finish();
             }
@@ -172,18 +166,11 @@ public class DiaryActivity extends AppCompatActivity implements OnScrollListener
                 //把Json字符串转化为List
                 diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
                 diary = diaryList.get(itemPosition);
+                id = diary.getId();
                 tv_title1.setText(diary.getTitle());
                 tv_title2.setText(diary.getTitle());
                 tv_diary.setText(diary.getDiary());
             }
-        }
-    };
-    //编辑日记
-    Runnable diaryEdit = new Runnable() {
-
-        @Override
-        public void run() {
-            // TODO
         }
     };
 

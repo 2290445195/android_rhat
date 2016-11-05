@@ -8,7 +8,6 @@ public class Diary {
     private String title;
     private String diary;
     private String date;
-    private String weather;
     private String mood;
 
     public int getId() {
@@ -37,13 +36,6 @@ public class Diary {
     }
     public void setDate(String date) {
         this.date = date;
-    }
-
-    public String getWeather() {
-        return weather;
-    }
-    public void setWeather(String weather) {
-        this.weather = weather;
     }
 
     public String getMood() {
