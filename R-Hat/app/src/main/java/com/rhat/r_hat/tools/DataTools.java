@@ -77,7 +77,6 @@ public class DataTools {
             jsonObject.addProperty("title", list.get(i).getTitle());
             jsonObject.addProperty("diary", list.get(i).getDiary());
             jsonObject.addProperty("date", list.get(i).getDate());
-            jsonObject.addProperty("weather", list.get(i).getWeather());
             jsonObject.addProperty("mood", list.get(i).getMood());
             jsonArray.add(jsonObject);
         }

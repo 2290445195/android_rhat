@@ -24,32 +24,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp"
-        android:alpha="0.7"
-        android:background="@android:color/transparent"
+        android:background="@drawable/corners_btn"
         android:src="@drawable/button_new" />
-
-    <ImageButton
-        android:id="@+id/main_btn_me"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="16dp"
-        android:layout_marginLeft="6dp"
-        android:background="@android:color/transparent"
-        android:src="@drawable/button_me"
-        android:visibility="gone" />
-
-    <ImageButton
-        android:id="@+id/main_btn_sync"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="16dp"
-        android:layout_marginRight="6dp"
-        android:adjustViewBounds="true"
-        android:alpha="0.7"
-        android:background="@android:color/transparent"
-        android:src="@drawable/button_sync" />
 
 </RelativeLayout>

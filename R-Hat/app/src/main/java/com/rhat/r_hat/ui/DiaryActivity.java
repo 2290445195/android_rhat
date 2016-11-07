@@ -38,9 +38,6 @@ public class DiaryActivity extends AppCompatActivity implements OnScrollListener
     private RelativeLayout rl_title2;
     private Intent intent;
 
-
-    //日记id
-    private int id;
     //顶部图片的高度
     private int imagv_height;
     //标题布局的高度
@@ -60,9 +57,6 @@ public class DiaryActivity extends AppCompatActivity implements OnScrollListener
         setContentView(R.layout.activity_diary);
         init();
 
-        intent = getIntent();
-        itemPosition = intent.getIntExtra("itemPosition", 0);
-
         //获取日记
         new Thread(getDiary).start();
 
@@ -77,7 +71,7 @@ public class DiaryActivity extends AppCompatActivity implements OnScrollListener
             public void onClick(View view) {
                 intent = new Intent();
                 intent.setClass(DiaryActivity.this, EditActivity.class);
-                intent.putExtra("id", id);
+                intent.putExtra("itemPosition", itemPosition);
                 startActivity(intent);
                 finish();
             }
@@ -97,6 +91,8 @@ public class DiaryActivity extends AppCompatActivity implements OnScrollListener
         imgv_top = (ImageView) findViewById(R.id.diary_imgv_top1);
         imgv_title = (ImageView) findViewById(R.id.diary_imgv_weather1);
         context = getApplicationContext();
+        intent = getIntent();
+        itemPosition = intent.getIntExtra("itemPosition", 0);
     }
 
     @Override
@@ -160,13 +156,11 @@ public class DiaryActivity extends AppCompatActivity implements OnScrollListener
         @Override
         public void run() {
             // TODO
-            //本地保存日记
             String jsonStr = null;
             if(!(jsonStr = dt.load(context, "diaryInfo", "diaryList")).equals("")){
                 //把Json字符串转化为List
                 diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
                 diary = diaryList.get(itemPosition);
-                id = diary.getId();
                 tv_title1.setText(diary.getTitle());
                 tv_title2.setText(diary.getTitle());
                 tv_diary.setText(diary.getDiary());

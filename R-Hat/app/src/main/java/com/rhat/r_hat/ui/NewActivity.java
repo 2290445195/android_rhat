@@ -133,8 +133,6 @@ public class NewActivity extends AppCompatActivity {
             Date date = new Date();
             int id = 1;
             int size = 0;
-            DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String time = format.format(date);
             if(!(jsonStr = dt.load(context, "diaryInfo", "diaryList")).equals("")){
                 //把Json字符串转化为List
                 diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
@@ -155,9 +153,7 @@ public class NewActivity extends AppCompatActivity {
                 }
                 diary.setTitle(title);
                 diary.setDiary(et_diary.getText().toString());
-                diary.setWeather(dt.load(context, "userinfo", "weather"));
                 diary.setMood("高兴");
-                diary.setDate(time);
                 diaryList.set(0, diary);
                 dt.save(context, "diaryCache", "diaryNew", dt.listToJsonArray(diaryList));
                 Log.v("jsonStr", dt.load(context, "diaryCache", "diaryNew"));
@@ -167,9 +163,7 @@ public class NewActivity extends AppCompatActivity {
                 diary.setId(id);
                 diary.setTitle(et_title.getText().toString());
                 diary.setDiary(et_diary.getText().toString());
-                diary.setWeather(dt.load(context, "userinfo", "weather"));
                 diary.setMood("高兴");
-                diary.setDate(time);
                 diaryList.add(diary);
                 dt.save(context, "diaryCache", "diaryNew", dt.listToJsonArray(diaryList));
                 Log.v("jsonStr", dt.load(context, "diaryCache", "diaryNew"));
@@ -214,37 +208,6 @@ public class NewActivity extends AppCompatActivity {
             Message msg = new Message();
             Bundle data = new Bundle();
             data.putString("result", value);
-            msg.setData(data);
-            handler.sendMessage(msg);
-        }
-    };
-    //获取天气
-    Runnable getWeather = new Runnable() {
-
-        @Override
-        public void run() {
-            // TODO
-            String value = new String();
-            String[] strAry = null;
-            String weather = new String();
-            try {
-                String district = URLEncoder.encode("广州", "utf-8");
-                String authkey = "cbe98fd5e0dd4405b2bbe95edb810c67";
-                String url = "http://api.36wu.com/Weather/GetWeather?district=" + district + "&authkey=" + authkey + "&format=json";
-                HttpUtils httpUtils = new HttpUtils();
-                strAry = httpUtils.getWeather(url);
-                if(strAry[0].equals("1")){
-                    weather = dt.jsonGetWeather(strAry[1]);
-                    Log.v("wether", weather);
-                    dt.save(context, "userinfo", "weather", weather);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            value = strAry[0];
-            Message msg = new Message();
-            Bundle data = new Bundle();
-            data.putString("weather", value);
             msg.setData(data);
             handler.sendMessage(msg);
         }

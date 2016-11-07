@@ -108,8 +108,6 @@ public class MainActivity extends ListActivity {
 
     protected void init(){
         imgbtn_new = (ImageButton) findViewById(R.id.main_btn_new);
-        imgbtn_me = (ImageButton) findViewById(R.id.main_btn_me);
-        imgbtn_sync = (ImageButton) findViewById(R.id.main_btn_sync);
         lv = (ListView) findViewById(android.R.id.list);
         context = getApplicationContext();
     }
