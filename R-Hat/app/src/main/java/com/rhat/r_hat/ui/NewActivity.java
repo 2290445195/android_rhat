@@ -132,7 +132,7 @@ public class NewActivity extends AppCompatActivity {
             String jsonStr = null;
             Date date = new Date();
             int id = 1;
-            int size = 0;
+            int size = 1;
             if(!(jsonStr = dt.load(context, "diaryInfo", "diaryList")).equals("")){
                 //把Json字符串转化为List
                 diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));

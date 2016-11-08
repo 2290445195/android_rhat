@@ -2,16 +2,21 @@ package com.rhat.r_hat.ui;
 
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
+import android.support.v7.app.AlertDialog;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -37,6 +42,7 @@ public class MainActivity extends ListActivity {
     private Context context;
     private Diary diary = new Diary();
     private List<Diary> diaryList;
+    private Diary diaryCache;
     private Intent intent = new Intent();
     private ListView lv;
     private ImageButton imgbtn_new;
@@ -52,6 +58,9 @@ public class MainActivity extends ListActivity {
         setContentView(R.layout.activity_main);
 
         init();
+
+        //检查是否未保存
+        new Thread(checkCache).start();
 
         /*
         *日记列表
@@ -111,5 +120,73 @@ public class MainActivity extends ListActivity {
         lv = (ListView) findViewById(android.R.id.list);
         context = getApplicationContext();
     }
+
+    /**对话框**/
+    //提示对话框
+    private void cacheDlg(){
+        Looper.prepare();
+        LayoutInflater factory = LayoutInflater.from(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("温馨提示");
+        builder.setMessage("您存在未保存的内容，是否继续？");
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent();
+                if(diaryList.isEmpty()){
+                    intent.setClass(MainActivity.this, DraftActivity.class);
+                    dialog.dismiss();
+                    startActivity(intent);
+                    finish();
+                }else{
+                    if (diaryCache.getId() == diaryList.size()) {
+                        intent.setClass(MainActivity.this, CacheActivity.class);
+                        dialog.dismiss();
+                        startActivity(intent);
+                        finish();
+                    }else{
+                        intent.setClass(MainActivity.this, DraftActivity.class);
+                        dialog.dismiss();
+                        startActivity(intent);
+                        finish();
+                    }
+                }
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                dt.dalete(context, "diaryCache", "diaryNew");
+                dialog.dismiss();
+            }
+        });
+        builder.show();
+        Looper.loop();
+    }
+
+    /**
+     * 子线程
+     */
+    //检查日记
+    Runnable checkCache = new Runnable() {
+
+        @Override
+        public void run() {
+            // TODO
+            String jsonStr = null;
+            String type = "";
+            if(!(jsonStr = dt.load(context, "diaryCache", "diaryNew")).equals("")){
+                //把Json字符串转化为List
+                diaryCache = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr)).get(0);
+                if(!(jsonStr = dt.load(context, "diaryInfo", "diaryList")).equals("")){
+                    //把Json字符串转化为List
+                    diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
+                }else{
+                    diaryList = new ArrayList<Diary>();
+                }
+                cacheDlg();
+            }
+        }
+    };
 
 }

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -13,27 +12,17 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.RelativeLayout;
-import android.widget.SimpleAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.rhat.r_hat.R;
 import com.rhat.r_hat.model.Diary;
 import com.rhat.r_hat.tools.DataTools;
-import com.rhat.r_hat.view.MyScrollView;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-public class EditActivity extends AppCompatActivity {
-    private Intent intent;
-    private int itemPosition = 0;
+public class CacheActivity extends AppCompatActivity {
+    private int size = 0;
     private ImageButton imgbtn_save;
     private Diary diary = new Diary();
     private List<Diary> diaryList;
@@ -55,6 +44,7 @@ public class EditActivity extends AppCompatActivity {
         init();
 
         //获取日记
+        Log.v("debug", "cache");
         new Thread(getDiary).start();
 
         imgbtn_save.setOnClickListener(new View.OnClickListener() {
@@ -98,8 +88,6 @@ public class EditActivity extends AppCompatActivity {
     private void init(){
         //获取控件对象
         context = getApplicationContext();
-        intent = getIntent();
-        itemPosition = intent.getIntExtra("itemPosition", 0);
         et_title = (EditText) findViewById(R.id.update_et_title);
         et_diary = (EditText) findViewById(R.id.update_et_diary);
         imgbtn_save = (ImageButton) findViewById(R.id.new_imgbtn_save);
@@ -119,13 +107,13 @@ public class EditActivity extends AppCompatActivity {
                 Intent intent = new Intent();
                 switch (Integer.parseInt(value[1])){
                     case 1:
-                        intent.setClass(EditActivity.this, MainActivity.class);
+                        intent.setClass(CacheActivity.this, MainActivity.class);
                         startActivity(intent);
                         Toast.makeText(context, "保存成功", Toast.LENGTH_SHORT).show();
                         finish();
                         break;
                     case 0:
-                        intent.setClass(EditActivity.this, MainActivity.class);
+                        intent.setClass(CacheActivity.this, MainActivity.class);
                         startActivity(intent);
                         finish();
                         break;
@@ -145,16 +133,19 @@ public class EditActivity extends AppCompatActivity {
         @Override
         public void run() {
             // TODO
-            Looper.prepare();
             String jsonStr = null;
             if(!(jsonStr = dt.load(context, "diaryInfo", "diaryList")).equals("")){
                 //把Json字符串转化为List
                 diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
-                diary = diaryList.get(itemPosition);
+                size = diaryList.size();
+            }
+            if(!(jsonStr = dt.load(context, "diaryCache", "diaryNew")).equals("")){
+                //把Json字符串转化为List
+                diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
+                diary = diaryList.get(0);
                 et_title.setText(diary.getTitle());
                 et_diary.setText(diary.getDiary());
             }
-            Looper.loop();
         }
     };
     //修改日记
@@ -163,7 +154,6 @@ public class EditActivity extends AppCompatActivity {
         @Override
         public void run() {
             String jsonStr = null;
-            int size = itemPosition + 1;
             if(!(jsonStr = dt.load(context, "diaryCache", "diaryNew")).equals("")){
                 String title = null;
                 //把Json字符串转化为List
@@ -210,7 +200,12 @@ public class EditActivity extends AppCompatActivity {
                     jsonStr2 = dt.load(context, "diaryInfo", "diaryList");
                     diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr2));
                     diary = list.get(0);
-                    diaryList.set(itemPosition, diary);
+                    for(int i = 0;i < diaryList.size();i++){
+                        if(diaryList.get(i).getId() == diary.getId()){
+                            diaryList.set(i, diary);
+                            break;
+                        }
+                    }
                     dt.save(context, "diaryInfo", "diaryList", dt.listToJsonArray(diaryList));
                     dt.dalete(context, "diaryCache", "diaryNew");
                     Log.v("jsonStr", dt.load(context, "diaryInfo", "diaryList"));

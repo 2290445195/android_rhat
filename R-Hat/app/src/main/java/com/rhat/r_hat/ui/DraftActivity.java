@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -13,35 +12,24 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.RelativeLayout;
-import android.widget.SimpleAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.rhat.r_hat.R;
 import com.rhat.r_hat.model.Diary;
 import com.rhat.r_hat.tools.DataTools;
-import com.rhat.r_hat.view.MyScrollView;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class EditActivity extends AppCompatActivity {
-    private Intent intent;
-    private int itemPosition = 0;
+public class DraftActivity extends AppCompatActivity {
+    private Context context;
     private ImageButton imgbtn_save;
+    private EditText et_title;
+    private EditText et_diary;
     private Diary diary = new Diary();
     private List<Diary> diaryList;
     private DataTools dt = new DataTools();
-    private Context context;
-    private EditText et_title;
-    private EditText et_diary;
-    private int id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +43,7 @@ public class EditActivity extends AppCompatActivity {
         init();
 
         //获取日记
+        Log.v("debug", "draft");
         new Thread(getDiary).start();
 
         imgbtn_save.setOnClickListener(new View.OnClickListener() {
@@ -75,7 +64,7 @@ public class EditActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 // 开启一个子线程，进行本地储存日记，等待有返回结果，使用handler通知UI
-                new Thread(diaryEditSave).start();
+                new Thread(diaryNewSave).start();
             }
         });
 
@@ -89,20 +78,16 @@ public class EditActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 // 开启一个子线程，进行本地储存日记，等待有返回结果，使用handler通知UI
-                new Thread(diaryEditSave).start();
+                new Thread(diaryNewSave).start();
             }
         });
-
     }
 
     private void init(){
-        //获取控件对象
-        context = getApplicationContext();
-        intent = getIntent();
-        itemPosition = intent.getIntExtra("itemPosition", 0);
+        context = getBaseContext();
+        imgbtn_save = (ImageButton) findViewById(R.id.new_imgbtn_save);
         et_title = (EditText) findViewById(R.id.update_et_title);
         et_diary = (EditText) findViewById(R.id.update_et_diary);
-        imgbtn_save = (ImageButton) findViewById(R.id.new_imgbtn_save);
     }
 
     Handler handler = new Handler() {
@@ -119,13 +104,13 @@ public class EditActivity extends AppCompatActivity {
                 Intent intent = new Intent();
                 switch (Integer.parseInt(value[1])){
                     case 1:
-                        intent.setClass(EditActivity.this, MainActivity.class);
+                        intent.setClass(DraftActivity.this, MainActivity.class);
                         startActivity(intent);
                         Toast.makeText(context, "保存成功", Toast.LENGTH_SHORT).show();
                         finish();
                         break;
                     case 0:
-                        intent.setClass(EditActivity.this, MainActivity.class);
+                        intent.setClass(DraftActivity.this, MainActivity.class);
                         startActivity(intent);
                         finish();
                         break;
@@ -145,30 +130,38 @@ public class EditActivity extends AppCompatActivity {
         @Override
         public void run() {
             // TODO
-            Looper.prepare();
             String jsonStr = null;
-            if(!(jsonStr = dt.load(context, "diaryInfo", "diaryList")).equals("")){
+            if(!(jsonStr = dt.load(context, "diaryCache", "diaryNew")).equals("")){
                 //把Json字符串转化为List
                 diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
-                diary = diaryList.get(itemPosition);
+                diary = diaryList.get(0);
                 et_title.setText(diary.getTitle());
                 et_diary.setText(diary.getDiary());
             }
-            Looper.loop();
         }
     };
-    //修改日记
-    Runnable diaryEditSave = new Runnable() {
+    //添加日记
+    Runnable diaryNewSave = new Runnable() {
 
         @Override
         public void run() {
             String jsonStr = null;
-            int size = itemPosition + 1;
+            Date date = new Date();
+            int id = 1;
+            int size = 0;
+            if(!(jsonStr = dt.load(context, "diaryInfo", "diaryList")).equals("")){
+                //把Json字符串转化为List
+                diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
+                id = diaryList.get(diaryList.size() - 1).getId() + 1;
+                size = diaryList.size() + 1;
+            }
             if(!(jsonStr = dt.load(context, "diaryCache", "diaryNew")).equals("")){
-                String title = null;
                 //把Json字符串转化为List
                 diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
                 diary = diaryList.get(0);
+                //最后一篇日记ID加1
+                diary.setId(id);
+                String title = null;
                 if(et_title.getText().toString().equals("")){
                     title = "日记" + size;
                 }else{
@@ -176,14 +169,17 @@ public class EditActivity extends AppCompatActivity {
                 }
                 diary.setTitle(title);
                 diary.setDiary(et_diary.getText().toString());
+                diary.setMood("高兴");
                 diaryList.set(0, diary);
                 dt.save(context, "diaryCache", "diaryNew", dt.listToJsonArray(diaryList));
                 Log.v("jsonStr", dt.load(context, "diaryCache", "diaryNew"));
             }else{
                 //新建一个日记列表
                 diaryList = new ArrayList<>();
+                diary.setId(id);
                 diary.setTitle(et_title.getText().toString());
                 diary.setDiary(et_diary.getText().toString());
+                diary.setMood("高兴");
                 diaryList.add(diary);
                 dt.save(context, "diaryCache", "diaryNew", dt.listToJsonArray(diaryList));
                 Log.v("jsonStr", dt.load(context, "diaryCache", "diaryNew"));
@@ -207,13 +203,21 @@ public class EditActivity extends AppCompatActivity {
                     //把Json字符串转化为List
                     List<Diary> list = new ArrayList<Diary>();
                     list = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr1));
-                    jsonStr2 = dt.load(context, "diaryInfo", "diaryList");
-                    diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr2));
-                    diary = list.get(0);
-                    diaryList.set(itemPosition, diary);
-                    dt.save(context, "diaryInfo", "diaryList", dt.listToJsonArray(diaryList));
-                    dt.dalete(context, "diaryCache", "diaryNew");
-                    Log.v("jsonStr", dt.load(context, "diaryInfo", "diaryList"));
+                    if (!(jsonStr2 = dt.load(context, "diaryInfo", "diaryList")).equals("")) {
+                        diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr2));
+                        diary = list.get(0);
+                        diaryList.add(diary);
+                        dt.save(context, "diaryInfo", "diaryList", dt.listToJsonArray(diaryList));
+                        dt.dalete(context, "diaryCache", "diaryNew");
+                        Log.v("jsonStr", dt.load(context, "diaryInfo", "diaryList"));
+                    } else {
+                        diaryList = new ArrayList<Diary>();
+                        diary = list.get(0);
+                        diaryList.add(diary);
+                        dt.save(context, "diaryInfo", "diaryList", dt.listToJsonArray(diaryList));
+                        dt.dalete(context, "diaryCache", "diaryNew");
+                        Log.v("jsonStr", dt.load(context, "diaryInfo", "diaryList"));
+                    }
                 }
             }
             //向Handle返回消息
