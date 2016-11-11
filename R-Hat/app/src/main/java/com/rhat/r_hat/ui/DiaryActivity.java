@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageButton;
@@ -18,7 +17,6 @@ import com.rhat.r_hat.tools.DataTools;
 import com.rhat.r_hat.view.MyScrollView;
 import com.rhat.r_hat.view.MyScrollView.OnScrollListener;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class DiaryActivity extends AppCompatActivity implements OnScrollListener {
@@ -37,15 +35,8 @@ public class DiaryActivity extends AppCompatActivity implements OnScrollListener
     private RelativeLayout rl_main;
     private RelativeLayout rl_title2;
     private Intent intent;
-
     //顶部图片的高度
     private int imagv_height;
-    //标题布局的高度
-    private int titleViewHeight;
-    //标题布局与其父类布局的顶部距离
-    private int titleViewTop;
-    //TextView的高度
-    private int tvheight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,11 +46,14 @@ public class DiaryActivity extends AppCompatActivity implements OnScrollListener
         getSupportActionBar().hide();
 
         setContentView(R.layout.activity_diary);
+
+        //初始化各变量
         init();
 
         //获取日记
         new Thread(getDiary).start();
 
+        //bringToFront方法的作用：把控件放到最顶层
         imgbtn_edit.bringToFront();
         rl_main.bringToFront();
         rl_title2.bringToFront();
@@ -69,10 +63,15 @@ public class DiaryActivity extends AppCompatActivity implements OnScrollListener
         imgbtn_edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //Intent是安卓四大组件之间用来通信的类
                 intent = new Intent();
+                //设置Intent的跳转目标，第一个参数为本Activity,第二个为跳转目标的Activity
                 intent.setClass(DiaryActivity.this, EditActivity.class);
+                //在Intent里以（key, value）的形式存放数据
                 intent.putExtra("itemPosition", itemPosition);
+                //开始跳转
                 startActivity(intent);
+                //结束本页面
                 finish();
             }
         });
@@ -80,6 +79,12 @@ public class DiaryActivity extends AppCompatActivity implements OnScrollListener
     }
 
     private void init(){
+        //获取程序上下文
+        context = getApplicationContext();
+        //获取上一个Activity传过来的intent
+        intent = getIntent();
+        //获取首页列表传过来的点击位置
+        itemPosition = intent.getIntExtra("itemPosition", 0);
         //获取控件对象
         tv_title1 = (TextView) findViewById(R.id.diary_tv_title1);
         tv_title2 = (TextView) findViewById(R.id.diary_tv_title2);
@@ -90,18 +95,13 @@ public class DiaryActivity extends AppCompatActivity implements OnScrollListener
         rl_title2 = (RelativeLayout) findViewById(R.id.diary_rl_title2);
         imgv_top = (ImageView) findViewById(R.id.diary_imgv_top1);
         imgv_title = (ImageView) findViewById(R.id.diary_imgv_weather1);
-        context = getApplicationContext();
-        intent = getIntent();
-        itemPosition = intent.getIntExtra("itemPosition", 0);
     }
 
+    //程序窗口获得焦点时，布局已经绘制完成
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if(hasFocus) {
-            //获取TextView的高度
-            tvheight = tv_diary.getHeight();
-
             //获取ImageView的高度
             imgv_top.post(new Runnable() {
 
@@ -111,38 +111,37 @@ public class DiaryActivity extends AppCompatActivity implements OnScrollListener
                     imagv_height = imgv_top.getHeight();
                 }
             });
-
-            //获取Title的高度
-            imgv_title.post(new Runnable() {
-
-                @Override
-                public void run() {
-                    //ImageView的宽和高
-                    titleViewHeight = imgv_title.getHeight() + 16 * 2;
-                }
-            });
         }
 
     }
 
+    //手机按键事件
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        //对应手机返回键
         if (keyCode == KeyEvent.KEYCODE_BACK ){
+            //新建一个Intent类对象，Intent为安卓四大组件的通信类
             intent = new Intent();
+            //设置Intent类的跳转
             intent.setClass(DiaryActivity.this, MainActivity.class);
+            //开始跳转
             startActivity(intent);
+            //关闭本页面
             finish();
         }
         return super.onKeyDown(keyCode, event);
     }
 
     /*事件监听*/
-    //日记滑动
+    //日记滑动，这里重写了ScrollView控件，实时获取scrollY
     @Override
     public void onScroll(int scrollY) {
-        if(scrollY >= imagv_height){
+        //判断Y轴的滚动距离
+        if(scrollY >= imagv_height){    //如果滚动距离大于顶部图片的距离
+            //显示顶部标题栏
             rl_title2.setVisibility(View.VISIBLE);
-        }else if(scrollY <= imagv_height){
+        }else if(scrollY <= imagv_height){  //如果滚动距离小于顶部图片的距离
+            //隐藏顶部标题栏
             rl_title2.setVisibility(View.INVISIBLE);
         }
     }
@@ -155,12 +154,15 @@ public class DiaryActivity extends AppCompatActivity implements OnScrollListener
 
         @Override
         public void run() {
-            // TODO
+            //创建一个字符串用来保存Json字符串
             String jsonStr = null;
+            //从"diaryInfo"中读取key为"diaryList"的值
             if(!(jsonStr = dt.load(context, "diaryInfo", "diaryList")).equals("")){
                 //把Json字符串转化为List
                 diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
+                //根据首页列表传过来的点击位置，来获取日记列表对应的日记
                 diary = diaryList.get(itemPosition);
+                //把日记内容显示到UI
                 tv_title1.setText(diary.getTitle());
                 tv_title2.setText(diary.getTitle());
                 tv_diary.setText(diary.getDiary());

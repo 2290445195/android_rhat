@@ -3,12 +3,12 @@ package com.rhat.r_hat.model;
 /**
  * Created by PartyJat on 2016/10/22.
  */
+//日记类
 public class Diary {
     private int id;
     private String title;
     private String diary;
     private String date;
-    private String mood;
 
     public int getId() {
         return id;
@@ -36,13 +36,6 @@ public class Diary {
     }
     public void setDate(String date) {
         this.date = date;
-    }
-
-    public String getMood() {
-        return mood;
-    }
-    public void setMood(String mood) {
-        this.mood = mood;
     }
 
 }

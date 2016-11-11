@@ -43,9 +43,9 @@ public class DraftActivity extends AppCompatActivity {
         init();
 
         //获取日记
-        Log.v("debug", "draft");
         new Thread(getDiary).start();
 
+        //保存按钮的点击事件
         imgbtn_save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -54,6 +54,7 @@ public class DraftActivity extends AppCompatActivity {
             }
         });
 
+        //标题栏编辑框的内容改变事件
         et_title.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
@@ -68,6 +69,7 @@ public class DraftActivity extends AppCompatActivity {
             }
         });
 
+        //正文编辑框的内容改变事件
         et_diary.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
@@ -83,13 +85,17 @@ public class DraftActivity extends AppCompatActivity {
         });
     }
 
+    //初始化
     private void init(){
+        //获取程序上下文
         context = getBaseContext();
+        //获取控件对象
         imgbtn_save = (ImageButton) findViewById(R.id.new_imgbtn_save);
         et_title = (EditText) findViewById(R.id.update_et_title);
         et_diary = (EditText) findViewById(R.id.update_et_diary);
     }
 
+    //Handler类用来接受线程发送的消息，来更新UI
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -98,7 +104,6 @@ public class DraftActivity extends AppCompatActivity {
             String result = data.getString("result");
             String value[] = result.split("_");
             Log.i("mylog", "请求结果为-->" + result);
-            // TODO
             // UI界面的更新等相关操作
             if("save".equals(value[0])){
                 Intent intent = new Intent();
@@ -129,12 +134,15 @@ public class DraftActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-            // TODO
+            //新建一个字符串，用来保存Json字符串
             String jsonStr = null;
+            //从"diaryCache"中读取key为"diaryNew"的值,diaryCache为日记缓冲区
             if(!(jsonStr = dt.load(context, "diaryCache", "diaryNew")).equals("")){
-                //把Json字符串转化为List
+                //把Json字符串转化为List，这是日记缓冲列表
                 diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
+                //获取日记列表里的日记对象
                 diary = diaryList.get(0);
+                //更新UI
                 et_title.setText(diary.getTitle());
                 et_diary.setText(diary.getDiary());
             }
@@ -145,44 +153,60 @@ public class DraftActivity extends AppCompatActivity {
 
         @Override
         public void run() {
+            //创建一个字符串用来保存Json字符串
             String jsonStr = null;
-            Date date = new Date();
+            //声明日记id变量
             int id = 1;
+            //声明日记列表长度变量
             int size = 0;
+            //从"diaryInfo"中读取key为"diaryList"的值,diaryInfo为日记列表，不为空时
             if(!(jsonStr = dt.load(context, "diaryInfo", "diaryList")).equals("")){
                 //把Json字符串转化为List
                 diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
+                //id等于日记列表最后一篇日记的id + 1
                 id = diaryList.get(diaryList.size() - 1).getId() + 1;
+                //size等于日记列表的长度加1
                 size = diaryList.size() + 1;
             }
+            //从"diaryCache"中读取key为"diaryNew"的值,diaryCache为日记缓冲区，如果不为空时
             if(!(jsonStr = dt.load(context, "diaryCache", "diaryNew")).equals("")){
                 //把Json字符串转化为List
                 diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
+                //获取日记缓冲区第一篇日记
                 diary = diaryList.get(0);
-                //最后一篇日记ID加1
+                //设置日记缓冲区里日记的id
                 diary.setId(id);
+                //声明一个空字符串，用来保存标题
                 String title = null;
+                //如果标题栏为空时
                 if(et_title.getText().toString().equals("")){
+                    //保存时添加一个默认的标题：日记+第几篇
                     title = "日记" + size;
-                }else{
+                }else{  //如果不为空
+                    //设置标题栏
                     title = et_title.getText().toString();
                 }
+                //设置日记对象的标题栏
                 diary.setTitle(title);
+                //设置日记对象的正文
                 diary.setDiary(et_diary.getText().toString());
-                diary.setMood("高兴");
+                //更新日记缓冲区第一篇日记的内容
                 diaryList.set(0, diary);
+                //把日记缓冲区的日记存储在文件中，文件名为"diaryCache"，key为"diaryNew"
                 dt.save(context, "diaryCache", "diaryNew", dt.listToJsonArray(diaryList));
-                Log.v("jsonStr", dt.load(context, "diaryCache", "diaryNew"));
-            }else{
+            }else{  //如果日记缓冲区为空
                 //新建一个日记列表
                 diaryList = new ArrayList<>();
+                //设置新日记的id
                 diary.setId(id);
+                //设置新日记的标题
                 diary.setTitle(et_title.getText().toString());
+                //设置新日记的正文
                 diary.setDiary(et_diary.getText().toString());
-                diary.setMood("高兴");
+                //把新日记对象添加到新日记列表
                 diaryList.add(diary);
+                //把新日记列表保存到日记缓冲区，文件名为"diaryCache"，key为"diaryNew"
                 dt.save(context, "diaryCache", "diaryNew", dt.listToJsonArray(diaryList));
-                Log.v("jsonStr", dt.load(context, "diaryCache", "diaryNew"));
             }
         }
     };
@@ -191,36 +215,49 @@ public class DraftActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-            // TODO
+            //声明发送给Handle的消息，成功为1，失败为0，未知错误为-1
             String value = "save_1";
+            //如果标题栏和正文都为空
             if(et_title.getText().toString().equals("") && et_diary.getText().toString().equals("")){
+                //把给Handle发送的消息设置成0
                 value = "save_0";
             }else {
-                //本地保存日记
+                //声明两个字符串用来保存Json字符串
                 String jsonStr1 = null;
                 String jsonStr2 = null;
+                //读取日记缓冲区，文件名为"diaryCache"，key为"diaryNew"，如果不为空时
                 if (!(jsonStr1 = dt.load(context, "diaryCache", "diaryNew")).equals("")) {
-                    //把Json字符串转化为List
+                    //声明一个列表变量
                     List<Diary> list = new ArrayList<Diary>();
+                    //把Json字符串转化为List，这是日记缓冲区列表
                     list = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr1));
+                    //读取日记列表，文件名为"diaryInfo"，key为"diaryList"，如果不为空时
                     if (!(jsonStr2 = dt.load(context, "diaryInfo", "diaryList")).equals("")) {
+                        //Json字符串转换成列表，这是日记列表
                         diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr2));
+                        //获取日记换冲区第一篇日记
                         diary = list.get(0);
+                        //把获取的日记缓冲区第一篇日记添加到日记列表
                         diaryList.add(diary);
+                        //保存日记列表，文件名为"diaryInfo"，key为"diaryList"
                         dt.save(context, "diaryInfo", "diaryList", dt.listToJsonArray(diaryList));
+                        //删除日记缓冲区
                         dt.dalete(context, "diaryCache", "diaryNew");
-                        Log.v("jsonStr", dt.load(context, "diaryInfo", "diaryList"));
-                    } else {
+                    } else {    //如果为空时
+                        //声明一个新的列表对象
                         diaryList = new ArrayList<Diary>();
+                        //获取日记缓冲区第一篇日记
                         diary = list.get(0);
+                        //把获取的日记缓冲区的第一篇日记添加到新声明的列表里
                         diaryList.add(diary);
+                        //保存日记列表，文件名为"diaryInfo"，key为"diaryList"
                         dt.save(context, "diaryInfo", "diaryList", dt.listToJsonArray(diaryList));
+                        //删除日记缓冲区
                         dt.dalete(context, "diaryCache", "diaryNew");
-                        Log.v("jsonStr", dt.load(context, "diaryInfo", "diaryList"));
                     }
                 }
             }
-            //向Handle返回消息
+            //向Handle发送消息，通知它更新UI
             Message msg = new Message();
             Bundle data = new Bundle();
             data.putString("result", value);

@@ -44,7 +44,6 @@ public class CacheActivity extends AppCompatActivity {
         init();
 
         //获取日记
-        Log.v("debug", "cache");
         new Thread(getDiary).start();
 
         imgbtn_save.setOnClickListener(new View.OnClickListener() {
@@ -64,7 +63,7 @@ public class CacheActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                // 开启一个子线程，进行本地储存日记，等待有返回结果，使用handler通知UI
+                // 开启一个子线程，进行日记缓存
                 new Thread(diaryEditSave).start();
             }
         });
@@ -78,7 +77,7 @@ public class CacheActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                // 开启一个子线程，进行本地储存日记，等待有返回结果，使用handler通知UI
+                // 开启一个子线程，进行日记缓存
                 new Thread(diaryEditSave).start();
             }
         });
@@ -86,13 +85,15 @@ public class CacheActivity extends AppCompatActivity {
     }
 
     private void init(){
-        //获取控件对象
+        //获取程序上下文
         context = getApplicationContext();
+        //获取控件对象
         et_title = (EditText) findViewById(R.id.update_et_title);
         et_diary = (EditText) findViewById(R.id.update_et_diary);
         imgbtn_save = (ImageButton) findViewById(R.id.new_imgbtn_save);
     }
 
+    //子线程用来更新UI的类
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -132,17 +133,22 @@ public class CacheActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-            // TODO
+            //创建一个字符串来存放Json字符串
             String jsonStr = null;
+            //从"diaryInfo"中读取key为"diaryList"的值，这是日记列表，如果不为空时
             if(!(jsonStr = dt.load(context, "diaryInfo", "diaryList")).equals("")){
-                //把Json字符串转化为List
+                //把Json字符串转化为List，读取日记列表
                 diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
+                //保存日记列表的长度
                 size = diaryList.size();
             }
+            //从"diaryCache"中读取key为"diaryNew"的值，这是日记缓冲区，如果不为空时
             if(!(jsonStr = dt.load(context, "diaryCache", "diaryNew")).equals("")){
-                //把Json字符串转化为List
+                //把Json字符串转化为List，读取日记缓存列表
                 diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
+                //获取缓存的日记对象
                 diary = diaryList.get(0);
+                //显示日记内容到UI
                 et_title.setText(diary.getTitle());
                 et_diary.setText(diary.getDiary());
             }
@@ -153,28 +159,38 @@ public class CacheActivity extends AppCompatActivity {
 
         @Override
         public void run() {
+            //创建一个字符串来存放Json字符串
             String jsonStr = null;
+            //从"diaryCache"中读取key为"diaryNew"的值，如果缓存不为空时
             if(!(jsonStr = dt.load(context, "diaryCache", "diaryNew")).equals("")){
                 String title = null;
-                //把Json字符串转化为List
+                //把Json字符串转化为List，读取日记缓存列表
                 diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
+                //获取缓存的日记对象
                 diary = diaryList.get(0);
+                //如果日记对象的标题为空，给他一个默认的标题：日记+日记篇数
                 if(et_title.getText().toString().equals("")){
                     title = "日记" + size;
                 }else{
                     title = et_title.getText().toString();
                 }
+                //给日记对象赋值
                 diary.setTitle(title);
                 diary.setDiary(et_diary.getText().toString());
+                //把新内容修改到日记列表对象
                 diaryList.set(0, diary);
+                //把日记列表对象保存到"diaryCache"里，key为"diaryNew"
                 dt.save(context, "diaryCache", "diaryNew", dt.listToJsonArray(diaryList));
                 Log.v("jsonStr", dt.load(context, "diaryCache", "diaryNew"));
-            }else{
+            }else{  //从"diaryCache"中读取key为"diaryNew"的值，如果缓存为空时
                 //新建一个日记列表
                 diaryList = new ArrayList<>();
+                //给一个日记对象赋值
                 diary.setTitle(et_title.getText().toString());
                 diary.setDiary(et_diary.getText().toString());
+                //把日记对象添加到日记列表
                 diaryList.add(diary);
+                //把日记列表对象保存到"diaryCache"里，key为"diaryNew"
                 dt.save(context, "diaryCache", "diaryNew", dt.listToJsonArray(diaryList));
                 Log.v("jsonStr", dt.load(context, "diaryCache", "diaryNew"));
             }
@@ -185,33 +201,43 @@ public class CacheActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-            // TODO
+            //新建一个字符串，用来保存发送给Handle的消息，1为成功，0为失败，-1为未知错误
             String value = "save_1";
+            //如果标题和正文都为空，则把value设置为0
             if(et_title.getText().toString().equals("") && et_diary.getText().toString().equals("")){
                 value = "save_0";
-            }else {
-                //本地保存日记
+            }else { //如果不为空
+                //新建两个字符串，用来保存Json字符串
                 String jsonStr1 = null;
                 String jsonStr2 = null;
+                //从"diaryCache"中读取key为"diaryNew"的值，如果不为空
                 if (!(jsonStr1 = dt.load(context, "diaryCache", "diaryNew")).equals("")) {
-                    //把Json字符串转化为List
+                    //创建一个列表对象
                     List<Diary> list = new ArrayList<Diary>();
+                    //把Json字符串转化为List，读取日记缓存列表
                     list = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr1));
+                    //从"diaryInfo"中读取key为"diaryList"的值
                     jsonStr2 = dt.load(context, "diaryInfo", "diaryList");
+                    //把Json字符串转化为List，读取日记列表
                     diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr2));
+                    //获取日记缓存列表的日记对象
                     diary = list.get(0);
+                    //遍历日记列表
                     for(int i = 0;i < diaryList.size();i++){
+                        //通过比较日记缓存列表和日记列表的日记对象的id，确定修改的是那一篇日记
                         if(diaryList.get(i).getId() == diary.getId()){
                             diaryList.set(i, diary);
                             break;
                         }
                     }
+                    //把日记列表对象保存到"diaryInfo"里，key为"diaryList"
                     dt.save(context, "diaryInfo", "diaryList", dt.listToJsonArray(diaryList));
+                    //删除日记缓存列表，文件名"diaryCache"，key为"diaryNew"
                     dt.dalete(context, "diaryCache", "diaryNew");
                     Log.v("jsonStr", dt.load(context, "diaryInfo", "diaryList"));
                 }
             }
-            //向Handle返回消息
+            //向Handle发送消息
             Message msg = new Message();
             Bundle data = new Bundle();
             data.putString("result", value);
