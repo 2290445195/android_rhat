@@ -9,7 +9,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -19,6 +21,7 @@ import com.rhat.r_hat.model.Diary;
 import com.rhat.r_hat.tools.DataTools;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -85,10 +88,29 @@ public class NewActivity extends AppCompatActivity {
 
     //初始化
     private void init(){
+        //获取程序上下文
         context = getBaseContext();
+        //获取控件对象
         imgbtn_save = (ImageButton) findViewById(R.id.new_imgbtn_save);
         et_title = (EditText) findViewById(R.id.update_et_title);
         et_diary = (EditText) findViewById(R.id.update_et_diary);
+    }
+
+    //手机按键事件
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        //对应手机返回键
+        if (keyCode == KeyEvent.KEYCODE_BACK ){
+            //新建一个Intent类对象，Intent为安卓四大组件的通信类
+            Intent intent = new Intent();
+            //设置Intent类的跳转
+            intent.setClass(NewActivity.this, MainActivity.class);
+            //开始跳转
+            startActivity(intent);
+            //关闭本页面
+            finish();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     //Handler类用来接受线程发送的消息，来更新UI
@@ -141,10 +163,13 @@ public class NewActivity extends AppCompatActivity {
             if(!(jsonStr = dt.load(context, "diaryInfo", "diaryList")).equals("")){
                 //把Json字符串转化为List
                 diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr));
-                //id等于日记列表最后一篇日记的id + 1
-                id = diaryList.get(diaryList.size() - 1).getId() + 1;
-                //size等于日记列表的长度加1
-                size = diaryList.size() + 1;
+                //如果日记列表不为空
+                if(!diaryList.isEmpty()){
+                    //id等于日记列表最后一篇日记的id + 1
+                    id = diaryList.get(diaryList.size() - 1).getId() + 1;
+                    //size等于日记列表的长度加1
+                    size = diaryList.size() + 1;
+                }
             }
             //从"diaryCache"中读取key为"diaryNew"的值,diaryCache为日记缓冲区，如果不为空时
             if(!(jsonStr = dt.load(context, "diaryCache", "diaryNew")).equals("")){
@@ -217,6 +242,9 @@ public class NewActivity extends AppCompatActivity {
                         diaryList = dt.jsonArrayToDiaryList(dt.jsonToJsonArray(jsonStr2));
                         //获取日记换冲区第一篇日记
                         diary = list.get(0);
+                        //设置日记时间为系统时间
+                        Calendar ca = Calendar.getInstance();
+                        diary.setDate(ca.get(Calendar.YEAR) + "-" + (ca.get(Calendar.MONTH)+1) + "-" + ca.get(Calendar.DAY_OF_MONTH));
                         //把获取的日记缓冲区第一篇日记添加到日记列表
                         diaryList.add(diary);
                         //保存日记列表，文件名为"diaryInfo"，key为"diaryList"
@@ -229,6 +257,9 @@ public class NewActivity extends AppCompatActivity {
                         diaryList = new ArrayList<Diary>();
                         //获取日记缓冲区第一篇日记
                         diary = list.get(0);
+                        //设置日记时间为系统时间
+                        Calendar ca = Calendar.getInstance();
+                        diary.setDate(ca.get(Calendar.YEAR) + "-" + (ca.get(Calendar.MONTH)+1) + "-" + ca.get(Calendar.DAY_OF_MONTH));
                         //把获取的日记缓冲区的第一篇日记添加到新声明的列表里
                         diaryList.add(diary);
                         //保存日记列表，文件名为"diaryInfo"，key为"diaryList"

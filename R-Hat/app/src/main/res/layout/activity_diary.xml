@@ -25,7 +25,7 @@
         android:paddingTop="10dp">
 
         <ImageView
-            android:id="@+id/diary_imgv_weather2"
+            android:id="@+id/diary_imgv_date2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@mipmap/ic_launcher" />
@@ -76,7 +76,7 @@
                     android:paddingTop="10dp">
 
                     <ImageView
-                        android:id="@+id/diary_imgv_weather1"
+                        android:id="@+id/diary_imgv_date1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@mipmap/ic_launcher" />
@@ -111,6 +111,18 @@
         </RelativeLayout>
 
     </com.rhat.r_hat.view.MyScrollView>
+
+    <ImageButton
+        android:id="@+id/diary_imgbtn_del"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_above="@+id/diary_imgbtn_edit"
+        android:background="@android:color/transparent"
+        android:src="@drawable/button_del"
+        android:alpha="0.7" />
 
     <ImageButton
         android:id="@id/diary_imgbtn_edit"
