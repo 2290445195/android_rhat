@@ -1,14 +1,17 @@
 package com.rhat.r_hat.ui;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -93,6 +96,49 @@ public class DraftActivity extends AppCompatActivity {
         imgbtn_save = (ImageButton) findViewById(R.id.new_imgbtn_save);
         et_title = (EditText) findViewById(R.id.update_et_title);
         et_diary = (EditText) findViewById(R.id.update_et_diary);
+    }
+
+    //手机按键事件
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        //对应手机返回键
+        if (keyCode == KeyEvent.KEYCODE_BACK ){
+            backDlg();
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    //确认返回对话框
+    private void backDlg(){
+        //创建一个对话框对象
+        AlertDialog.Builder builder = new AlertDialog.Builder(DraftActivity.this);
+        builder.setTitle("温馨提示");
+        builder.setMessage("确定要放弃更改？");
+        //设置对话框的信息
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                //清空日记缓冲区
+                dt.dalete(context, "diaryCache", "diaryNew");
+                //新建一个Intent类对象，Intent为安卓四大组件的通信类
+                Intent intent = new Intent();
+                //设置Intent类的跳转
+                intent.setClass(DraftActivity.this, MainActivity.class);
+                //开始跳转
+                startActivity(intent);
+                //关闭本页面
+                finish();
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        //显示对话框
+        builder.show();
     }
 
     //Handler类用来接受线程发送的消息，来更新UI
