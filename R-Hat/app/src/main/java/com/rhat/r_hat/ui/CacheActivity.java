@@ -33,7 +33,6 @@ public class CacheActivity extends AppCompatActivity {
     private Context context;
     private EditText et_title;
     private EditText et_diary;
-    private int id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

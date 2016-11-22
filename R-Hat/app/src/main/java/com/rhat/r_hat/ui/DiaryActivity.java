@@ -184,7 +184,7 @@ public class DiaryActivity extends AppCompatActivity implements OnScrollListener
             rl_title2.setVisibility(View.VISIBLE);
         }else if(scrollY <= imagv_height){  //如果滚动距离小于顶部图片的距离
             //隐藏顶部标题栏
-            rl_title2.setVisibility(View.INVISIBLE);
+            rl_title2.setVisibility(View.GONE);
         }
     }
 
